@@ -8,6 +8,7 @@ from AnomalyCLIP_lib.simple_tokenizer import SimpleTokenizer as _Tokenizer
 # simple_tokenizer = tokenizer.SimpleTokenizer()
 from copy import deepcopy
 import torch.nn as nn
+import torch.nn.functional as F
 
 _tokenizer = _Tokenizer()
 
@@ -171,7 +172,7 @@ class PositionwiseFeedForward(nn.Module):
 
         residual = x
 
-        x = self.w_2(F.relu(self.w_1(x)))
+        x = self.w_2(F.gelu(self.w_1(x)))
         x = self.dropout(x)
         x = x+residual
 
@@ -414,8 +415,8 @@ class AnomalyCLIP_PromptLearner(nn.Module):
         self.register_buffer("tokenized_prompts_pos", tokenized_prompts_pos)
         self.register_buffer("tokenized_prompts_neg", tokenized_prompts_neg)
         print("tokenized_prompts shape", self.tokenized_prompts_pos.shape, self.tokenized_prompts_neg.shape)
-        self.predictor_learnable = CrossAttention(n_layers=2)
-        self.predictor_user_specific = CrossAttention(n_layers=2)
+        self.predictor_learnable = CrossAttention(n_layers=2, n_head=4)
+        self.predictor_user_specific = CrossAttention(n_layers=2, n_head=4)
         self.adapter = Adapter(768, 768)
 
 
