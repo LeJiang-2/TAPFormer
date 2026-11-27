@@ -65,8 +65,12 @@ def train(args):
     model.to(device)
     model.visual.DAPM_replace(DPAM_layer = 20)
     ##########################################################################################
-    optimizer = torch.optim.Adam(list(prompt_learner.parameters()), lr=args.learning_rate, betas=(0.5, 0.999))
-
+    optimizer = torch.optim.Adam(list(prompt_learner.parameters()), lr=args.learning_rate, betas=(0.5, 0.999), weight_decay=1e-4)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer,
+        T_max=args.epoch,
+        eta_min=1e-6,
+    )
     # losses
     loss_focal = FocalLoss()
     loss_dice = BinaryDiceLoss()
@@ -183,6 +187,7 @@ def train(args):
             (loss+image_loss).backward()
             optimizer.step()
             loss_list.append(loss.item())
+        scheduler.step()
 
         # logs
         if (epoch + 1) % args.print_freq == 0:
