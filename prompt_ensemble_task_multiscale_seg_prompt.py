@@ -320,14 +320,14 @@ class AnomalyCLIP_PromptLearner(nn.Module):
             ctx_init_neg = ctx_init_neg.replace("_", " ")
             n_ctx_pos = len(ctx_init_pos.split(" "))
             n_ctx_neg = len(ctx_init_neg.split(" "))
-            #³õÊ¼»¯text³Ébpd±àÂë
+            #åˆå§‹åŒ–textæˆbpdç¼–ç 
             prompt_pos = tokenize(ctx_init_pos)
             prompt_neg = tokenize(ctx_init_neg)
             with torch.no_grad():
-                #Éú³ÉÏàÓ¦µÄtext embedding
+                #ç”Ÿæˆç›¸åº”çš„text embedding
                 embedding_pos = clip_model.token_embedding(prompt_pos).type(dtype)
                 embedding_neg = clip_model.token_embedding(prompt_neg).type(dtype)
-            #ÕâĞ©ÊÇÈ¥³ı³öÀ´EOS ºÍ # CLS, EOS£¬ »ñµÃ¿ÉÑ§Ï°µÄtextual prompt
+            #è¿™äº›æ˜¯å»é™¤å‡ºæ¥EOS å’Œ # CLS, EOSï¼Œ è·å¾—å¯å­¦ä¹ çš„textual prompt
             ctx_vectors_pos = embedding_pos[0, 1: 1 + n_ctx_pos, :]
             ctx_vectors_neg = embedding_neg[0, 1: 1 + n_ctx_neg, :]
             prompt_prefix_pos = ctx_init_pos
@@ -345,7 +345,7 @@ class AnomalyCLIP_PromptLearner(nn.Module):
             # Random Initialization
             if True:
                 print("Initializing class-specific contexts")
-                #ÕâÀïÊÇclsÊÇÀàµÄ¸öÊı£¬n_ctx_pos´ú±ílearnable tokenµÄ³¤¶È£¬ctx_dim±íÊ¾promptµÄdimension
+                #è¿™é‡Œæ˜¯clsæ˜¯ç±»çš„ä¸ªæ•°ï¼Œn_ctx_posä»£è¡¨learnable tokençš„é•¿åº¦ï¼Œctx_dimè¡¨ç¤ºpromptçš„dimension
                 ctx_vectors_pos = torch.empty(self.n_cls, self.normal_num, n_ctx_pos, ctx_dim, dtype=dtype)
                 ctx_vectors_neg = torch.empty(self.n_cls, self.anormaly_num, n_ctx_neg, ctx_dim, dtype=dtype)
 
@@ -387,7 +387,7 @@ class AnomalyCLIP_PromptLearner(nn.Module):
             tokenized_prompts_neg.append(tokenize(p_neg))
         tokenized_prompts_pos = torch.cat(tokenized_prompts_pos)
         tokenized_prompts_neg = torch.cat(tokenized_prompts_neg)
-        #Éú³ÉÏàÓ¦µÄtext embedding
+        #ç”Ÿæˆç›¸åº”çš„text embedding
         with torch.no_grad():
             embedding_pos = clip_model.token_embedding(tokenized_prompts_pos).type(dtype)
             embedding_neg = clip_model.token_embedding(tokenized_prompts_neg).type(dtype)
@@ -420,8 +420,8 @@ class AnomalyCLIP_PromptLearner(nn.Module):
 
 
     def ca(self, learnable, user_specific):
-        user_specific = self.adapter(learnable)
-        learnable = self.adapter(user_specific)
+        user_specific = self.adapter(user_specific)
+        learnable = self.adapter(learnable)
 
         user_specific = self.predictor_user_specific(user_specific, learnable, learnable)
         learnable = self.predictor_learnable(learnable, user_specific, user_specific)
