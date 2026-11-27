@@ -145,11 +145,24 @@ def train(args):
                     similarity_map = AnomalyCLIP_lib.get_similarity_map(similarity[:, 1:, :], args.image_size).permute(0, 3, 1, 2)
                     similarity_map_list.append(similarity_map)
 
+
+
+            by_kernal = torch.Tensor([
+                              [[-1,-1,-1],[-1,8,-1],[-1,-1,-1]],
+            ])
+
+            by_kernal = by_kernal.reshape((1,1,3,3))
+
+            gt_edge = F.conv2d(gt.unsqueeze(1),by_kernal.cuda())
+            gt_edge = gt_edge[:, 0, :, :]
+
             loss = 0
             for i in range(len(similarity_map_list)):
                 loss += loss_focal(similarity_map_list[i], gt)
                 loss += loss_dice(similarity_map_list[i][:, 1, :, :], gt)
                 loss += loss_dice(similarity_map_list[i][:, 0, :, :], 1-gt)
+                similarity_map_list_edge = F.conv2d(similarity_map_list[i][:, 1, :, :].unsqueeze(1),by_kernal.cuda())[:, 0, :, :]
+                loss += loss_dice(similarity_map_list_edge, gt_edge)
 
             image_loss = 0
             for idx in range(len(text_features_classify_pos)):
