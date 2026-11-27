@@ -110,7 +110,9 @@ def train(args):
 
             prompts, tokenized_prompts, compound_prompts_text = prompt_learner(cls_id = None)
             text_features = model.encode_text_learn(prompts, tokenized_prompts, compound_prompts_text).float()
-
+                
+            text_features = prompt_learner.ca(text_features, defined_text_features)
+                
             text_features_classify_pos = torch.stack([text_features[0:1, ...]], dim = 0)[0]
             text_features_seg_pos = torch.stack([text_features[1:5, ...]], dim = 0)[0]
             text_features_classify_neg = torch.stack([text_features[5:6, ...]], dim = 0)[0]
